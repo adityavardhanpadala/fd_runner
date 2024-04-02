@@ -48,7 +48,7 @@ public class Main {
         File apk = new File(apkFilePath);
         // Get filename without extension
         String apkName = apk.getName().replaceFirst("[.][^.]+$", "");
-        File droidReport = new File("droidbench_traces/" + apkName + "-flow-report.xml");
+        File droidReport = new File("fdrunnerlogs/" + apkName + "-flow-report.xml");
 
         InfoflowAndroidConfiguration conf = new InfoflowAndroidConfiguration();
         conf.getAnalysisFileConfig().setAndroidPlatformDir(androidDirPath);
