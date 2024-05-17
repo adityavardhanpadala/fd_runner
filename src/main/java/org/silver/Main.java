@@ -17,14 +17,18 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 public class Main {
-    private final static String USAGE = "Usage: java -jar <path-to-flowdroid-pt> <android-platform-dir> <source-sink-file> <taint-wrapper-file> <apk-file>";
+    private final static String USAGE = "Usage: java -jar <path-to-flowdroid-pt> <android-platform-dir> <source-sink-file> <taint-wrapper-file> <apk-file> <xml-op-dir> <callback-time> <dataflow-time>";
     private static String androidDirPath;
     private static String sourceSinkFilePath;
     private static String taintWrapperFilePath;
     private static String apkFilePath;
+    private static String droidReportPath;
+    private static int callbackTime=300;
+    private static int dataflowTime=600;
+
 
     static void parseArgs(String[] args) {
-        if (args.length != 4) {
+        if (args.length != 5) {
             System.out.println(USAGE);
             return;
         }
@@ -33,6 +37,13 @@ public class Main {
         sourceSinkFilePath = args[1];
         taintWrapperFilePath = args[2];
         apkFilePath = args[3];
+        droidReportPath = args[4];
+
+        if (args.length == 7) {
+            callbackTime = Integer.parseInt(args[5]);
+            dataflowTime = Integer.parseInt(args[6]);
+        }
+
     }
     public static void main(String[] args) {
         parseArgs(args);
@@ -48,7 +59,7 @@ public class Main {
         File apk = new File(apkFilePath);
         // Get filename without extension
         String apkName = apk.getName().replaceFirst("[.][^.]+$", "");
-        File droidReport = new File("fdrunnerlogs/" + apkName + "-flow-report.xml");
+        File droidReport = new File( droidReportPath+ "/" + "flow-report.xml");
 
         InfoflowAndroidConfiguration conf = new InfoflowAndroidConfiguration();
         conf.getAnalysisFileConfig().setAndroidPlatformDir(androidDirPath);
@@ -60,7 +71,10 @@ public class Main {
         conf.setMergeDexFiles(true);
         conf.getCallbackConfig().setCallbackAnalyzer(InfoflowAndroidConfiguration.CallbackAnalyzer.Fast);
         conf.getCallbackConfig().setEnableCallbacks(true);
-        conf.getCallbackConfig().setCallbackAnalysisTimeout(1000);
+        conf.getCallbackConfig().setCallbackAnalysisTimeout(callbackTime);
+        conf.setDataFlowTimeout(dataflowTime);
+        conf.setImplicitFlowMode(InfoflowConfiguration.ImplicitFlowMode.AllImplicitFlows);
+        conf.setEnableArrayTracking(true);
 
         SetupApplication setup = new SetupApplication(conf);
 
